@@ -45,6 +45,81 @@ print(f"Slope (Coefficient): {model.coef_[0]}")
 print(f"Intercept: {model.intercept_}")
         `
 
+var code2 string = `
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv('Iris.csv')
+
+print("first few rows of the dataset:\n",df.head())
+
+# Step 1: Preprocessing
+# Remove rows where species is 'Iris-setosa'
+df = df[df['Species'] != 'Iris-setosa']
+
+# One-hot encoding of the 'species' column
+df = pd.get_dummies(df, columns=['Species'], drop_first= True)
+# Split data into features (X) and target (y)
+X = df.drop('SepalLengthCm', axis=1)  # Features excluding target variable
+y = df['SepalLengthCm']               # Target variable
+
+# Split the dataset into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 2: Train the model without a bias term
+# Set fit_intercept=False to train without a bias term
+model_no_bias = LinearRegression(fit_intercept=False)
+model_no_bias.fit(X_train, y_train)
+
+# Step 3: Train the model with a bias term
+model_with_bias = LinearRegression(fit_intercept=True)
+model_with_bias.fit(X_train, y_train)
+
+# Step 4: Model evaluation
+# Predictions
+y_pred_no_bias = model_no_bias.predict(X_test)
+y_pred_with_bias = model_with_bias.predict(X_test)
+
+# Calculate Mean Squared Error for both models
+mse_no_bias = mean_squared_error(y_test, y_pred_no_bias)
+mse_with_bias = mean_squared_error(y_test, y_pred_with_bias)
+
+print(f"Mean Squared Error without bias: {mse_no_bias}")
+print(f"Mean Squared Error with bias: {mse_with_bias}")
+
+# Step 5: Plotting the results
+# Plot predictions vs actual values for both models
+plt.figure(figsize=(10, 5))
+
+# Plot for model without bias
+plt.subplot(1, 2, 1)
+plt.scatter(y_test, y_pred_no_bias, color='blue')
+plt.title('Model Without Bias')
+plt.xlabel('Actual Values')
+plt.ylabel('Predicted Values')
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red')
+
+# Plot for model with bias
+plt.subplot(1, 2, 2)
+plt.scatter(y_test, y_pred_with_bias, color='green')
+plt.title('Model With Bias')
+plt.xlabel('Actual Values')
+plt.ylabel('Predicted Values')
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red')
+
+plt.tight_layout()
+plt.show()
+
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
+}
+func Lab2Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code2))
 }

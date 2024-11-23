@@ -12,7 +12,7 @@ func main() {
 	v1 := router.Group("/ai_ethics")
 	{
 		v1.GET("/1", aiethics.Lab1Code)
-		v1.GET("/2", aiethics.Lab1Code)
+		v1.GET("/2", aiethics.Lab2Code)
 		v1.GET("/3", aiethics.Lab1Code)
 		v1.GET("/4", aiethics.Lab1Code)
 		v1.GET("/5", aiethics.Lab1Code)
