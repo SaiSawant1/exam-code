@@ -16,7 +16,7 @@ func main() {
 		v1.GET("/3", aiethics.Lab3Code)
 		v1.GET("/4", aiethics.Lab4Code)
 		v1.GET("/5", aiethics.Lab5Code)
-		v1.GET("/6", aiethics.Lab1Code)
+		v1.GET("/6", aiethics.Lab6Code)
 		v1.GET("/7", aiethics.Lab1Code)
 		v1.GET("/8", aiethics.Lab1Code)
 		v1.GET("/9", aiethics.Lab1Code)

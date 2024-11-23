@@ -209,6 +209,158 @@ if __name__ == "__main__":
   check_class_imbalance(labels)
 `
 
+var code6 string = `
+import pandas as pd
+
+# URL for the UCI Adult Income dataset
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data'
+
+# Column names for the dataset
+column_names = [
+    'Age', 'Workclass', 'fnlwgt', 'Education', 'Education-Num',
+    'Marital-Status', 'Occupation', 'Relationship', 'Race',
+    'Sex', 'Capital-Gain', 'Capital-Loss', 'Hours-per-week',
+    'Native-Country', 'Income'
+]
+
+# Load the dataset
+data = pd.read_csv(url, header=None, names=column_names)
+
+# Function to anonymize the dataset
+def anonymize_dataset(df):
+    # Anonymize specific columns as needed
+    if 'Age' in df.columns:
+        df['Age'] = 'REDACTED'  # You could also anonymize it differently
+
+    if 'Workclass' in df.columns:
+        df['Workclass'] = 'REDACTED'
+
+    if 'Occupation' in df.columns:
+        df['Occupation'] = 'REDACTED'
+
+    if 'Native-Country' in df.columns:
+        df['Native-Country'] = 'REDACTED'
+
+    # Income column (target variable) can also be anonymized
+    if 'Income' in df.columns:
+        df['Income'] = df['Income'].replace({'<=50K': 'REDACTED', '>50K': 'REDACTED'})
+
+    return df
+
+# Anonymize the dataset
+anonymized_df = anonymize_dataset(data)
+
+# Display the original and anonymized datasets
+print("Original Dataset:\n", data.head())
+print("\nAnonymized Dataset:\n", anonymized_df.head())
+
+import pandas as pd
+
+# URL for the UCI Adult Income dataset
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data'
+
+# Column names for the dataset
+column_names = [
+    'Age', 'Workclass', 'fnlwgt', 'Education', 'Education-Num',
+    'Marital-Status', 'Occupation', 'Relationship', 'Race',
+    'Sex', 'Capital-Gain', 'Capital-Loss', 'Hours-per-week',
+    'Native-Country', 'Income'
+]
+
+# Load the dataset
+data = pd.read_csv(url, header=None, names=column_names)
+
+# Function to apply Caesar cipher
+def caesar_cipher(text, shift):
+    result = []
+    for char in text:
+        if char.isalpha():
+            # Shift within the alphabet
+            shift_base = ord('A') if char.isupper() else ord('a')
+            result.append(chr((ord(char) - shift_base + shift) % 26 + shift_base))
+        else:
+            result.append(char)  # Non-alphabetical characters remain unchanged
+    return ''.join(result)
+
+# Function to anonymize the dataset
+def anonymize_dataset(df, shift):
+    # Anonymize specific columns using Caesar cipher
+    if 'Workclass' in df.columns:
+        df['Workclass'] = df['Workclass'].apply(lambda x: caesar_cipher(x, shift))
+
+    if 'Occupation' in df.columns:
+        df['Occupation'] = df['Occupation'].apply(lambda x: caesar_cipher(x, shift))
+
+    if 'Native-Country' in df.columns:
+        df['Native-Country'] = df['Native-Country'].apply(lambda x: caesar_cipher(x, shift))
+
+    # Income column (target variable) can also be anonymized
+    if 'Income' in df.columns:
+        df['Income'] = df['Income'].replace({'<=50K': 'REDACTED', '>50K': 'REDACTED'})
+
+    return df
+
+# Anonymize the dataset with a Caesar cipher shift of 3
+shift_value = 3
+anonymized_df = anonymize_dataset(data, shift_value)
+
+# Display the original and anonymized datasets
+print("Original Dataset:\n", data.head())
+print("\nAnonymized Dataset:\n", anonymized_df.head())
+
+import pandas as pd
+
+# Sample dataset with PII (Replace this with your dataset or use an external dataset)
+data = {
+    'Name': ['Alice Johnson', 'Bob Smith', 'Charlie Brown', 'David Lee'],
+    'Email': ['alice@example.com', 'bob@example.com', 'charlie@example.com', 'david@example.com'],
+    'Age': [28, 34, 22, 40],
+    'City': ['New York', 'Los Angeles', 'Chicago', 'Houston'],
+    'Phone': ['123-456-7890', '098-765-4321', '555-555-5555', '999-999-9999']
+}
+
+# Load the dataset into a pandas DataFrame
+df = pd.DataFrame(data)
+
+# Function to anonymize the dataset
+def anonymize_dataset(df, pii_columns, method="mask"):
+    """
+    Anonymizes a dataset by removing or masking personally identifiable information (PII).
+
+    Parameters:
+    df (pd.DataFrame): The input dataset.
+    pii_columns (list): List of columns containing PII to anonymize.
+    method (str): The anonymization method ("remove" or "mask").
+
+    Returns:
+    pd.DataFrame: Anonymized dataset.
+    """
+    anonymized_df = df.copy()  # Create a copy to avoid modifying the original dataset
+
+    if method == "remove":
+        # Drop PII columns
+        anonymized_df = anonymized_df.drop(columns=pii_columns)
+    elif method == "mask":
+        # Mask PII values with anonymized text
+        for column in pii_columns:
+            anonymized_df[column] = anonymized_df[column].apply(lambda _: f"{column}123")
+
+    return anonymized_df
+
+# Define PII columns
+pii_columns = ['Name', 'Email', 'Phone']
+
+# Test the function with both anonymization methods
+anonymized_df_remove = anonymize_dataset(df, pii_columns, method="remove")
+anonymized_df_mask = anonymize_dataset(df, pii_columns, method="mask")
+
+# Display original and anonymized datasets
+print("Original Dataset:\n", df)
+print("\nAnonymized Dataset (Remove PII):\n", anonymized_df_remove)
+print("\nAnonymized Dataset (Mask PII):\n", anonymized_df_mask)
+
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
 }
@@ -223,4 +375,7 @@ func Lab4Code(c *gin.Context) {
 }
 func Lab5Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code5))
+}
+func Lab6Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code6))
 }
