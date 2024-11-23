@@ -117,9 +117,49 @@ plt.show()
 
 `
 
+var code3 string = `
+import gensim.downloader as api
+import numpy as np
+model = api.load('word2vec-google-news-300')
+#Words for analogy
+word_a, word_b, word_c = 'delhi' , 'india' , 'colombo'
+#find the words that completes
+result = model.most_similar(positive=[word_b, word_c], negative=[word_a], topn=1)
+word_d = result[0][0]
+print(f"{word_a} is to {word_b} as {word_c} is to {word_d} ")
+print(f"word: {word_d}, Similarity: {result[0][1]}")
+words = [word_a, word_b, word_c, word_d]
+word_vectors = np.array([model[word] for word in words])
+
+for i, word in enumerate(words):
+  print(f"Vector for '{word}': {word_vectors[i]}")
+
+# Assuming 'model' is already defined and loaded with word vectors
+
+paragraph = """ AI ethics are the set of guiding principles that stakeholders (from engineers to government officials) use to ensure artificial intelligence technology is developed and used responsibly. This means taking a safe, secure, humane, and environmentally friendly approach to AI."""
+
+words = paragraph.lower().split()
+
+key_terms = ["ethics", "intelligence", "humane"]
+
+for term in key_terms:
+    if term in words:
+        similar_words = model.most_similar(term, topn=5)
+        print(f"Words similar to '{term}':")
+        for word, similarity in similar_words:
+            print(f"({word}): ({similarity})")
+        print("\n")
+    else:
+        print(f"'{term}' not found in the paragraph.\n")
+
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
 }
 func Lab2Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code2))
+}
+func Lab3Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code3))
 }
