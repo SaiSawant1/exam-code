@@ -689,6 +689,75 @@ if __name__ == "__main__":
         print("Monitoring stopped by user.")
 
 `
+var code10 = `
+!pip install fairlearn scikit-learn numpy
+
+# Step 1: Import necessary libraries
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+from fairlearn.reductions import ExponentiatedGradient, DemographicParity
+from fairlearn.metrics import MetricFrame, selection_rate
+
+# Step 2: Create a synthetic dataset with bias
+X, y = make_classification(
+    n_samples=1000,
+    n_features=5,
+    n_informative=3,
+    n_redundant=0,
+    random_state=42
+)
+sensitive_feature = np.random.choice(["Male", "Female"], size=1000, p=[0.6, 0.4])
+
+# Step 3: Split the dataset into training and test sets
+X_train, X_test, y_train, y_test, sensitive_train, sensitive_test = train_test_split(
+    X, y, sensitive_feature, test_size=0.3, random_state=42
+)
+
+# Step 4: Train an unconstrained (original) model
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Original Model Accuracy: {accuracy:.2f}")
+
+# Step 5: Calculate fairness metrics
+metric_frame = MetricFrame(
+    metrics=selection_rate,
+    y_true=y_test,
+    y_pred=y_pred,
+    sensitive_features=sensitive_test
+)
+print("Original Selection Rates by Group:")
+print(metric_frame.by_group)
+
+# Step 6: Apply ExponentiatedGradient with DemographicParity
+fair_model = LogisticRegression(solver="liblinear")
+constraint = DemographicParity()
+mitigator = ExponentiatedGradient(estimator=fair_model, constraints=constraint)
+
+# Train the fair model
+mitigator.fit(X_train, y_train, sensitive_features=sensitive_train)
+y_pred_fair = mitigator.predict(X_test)
+
+# Step 7: Evaluate the fair model
+accuracy_fair = accuracy_score(y_test, y_pred_fair)
+print(f"Fair Model Accuracy: {accuracy_fair:.2f}")
+
+# Step 8: Recalculate fairness metrics
+metric_frame_fair = MetricFrame(
+    metrics=selection_rate,
+    y_true=y_test,
+    y_pred=y_pred_fair,
+    sensitive_features=sensitive_test
+)
+print("Fair Model Selection Rates by Group:")
+print(metric_frame_fair.by_group)
+
+`
 
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
@@ -716,4 +785,7 @@ func Lab8Code(c *gin.Context) {
 }
 func Lab9Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code9))
+}
+func Lab10Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code10))
 }
