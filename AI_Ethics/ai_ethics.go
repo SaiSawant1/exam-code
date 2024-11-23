@@ -635,6 +635,60 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 monitor_performance(X_train, y_train, X_test, y_test, epochs=50, window_size=5)
 
 `
+var code9 = `
+import logging
+import random
+import time
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s',
+    filename='system_log.txt',
+    filemode='a'  # Append to the log file
+)
+
+# Define AISystem class
+class AISystem:
+    def __init__(self):
+        # Initialize load with a default value
+        self.load = 0.0
+
+    def update_load(self):
+        # Simulate load with a random value between 0 and 1
+        self.load = random.uniform(0, 1)
+        return self.load
+
+# Define the monitoring function
+def monitor_system(ai_system, threshold=0.8):
+    # Update and get the current load
+    current_load = ai_system.update_load()
+    if current_load >= threshold:
+        # Trigger fail-safe if load exceeds the threshold
+        message = f"ALERT: Fail-safe triggered! Current load: {current_load:.2f} exceeds threshold: {threshold:.2f}"
+        logging.info(message)
+        print(message)
+    else:
+        # Log normal operation status
+        message = f"System operating normally. Current load: {current_load:.2f}"
+        logging.info(message)
+        print(message)
+
+# Main script
+if __name__ == "__main__":
+    # Instantiate AISystem
+    ai_system = AISystem()
+
+    # Run monitoring in a loop
+    print("Starting system monitoring...")
+    try:
+        for _ in range(10):  # Example: run monitoring 10 times
+            monitor_system(ai_system, threshold=0.8)
+            time.sleep(2)  # Delay for 2 seconds between checks
+    except KeyboardInterrupt:
+        print("Monitoring stopped by user.")
+
+`
 
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
@@ -659,4 +713,7 @@ func Lab7Code(c *gin.Context) {
 }
 func Lab8Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code8))
+}
+func Lab9Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code9))
 }
