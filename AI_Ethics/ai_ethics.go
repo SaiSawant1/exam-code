@@ -361,6 +361,29 @@ print("\nAnonymized Dataset (Mask PII):\n", anonymized_df_mask)
 
 `
 
+var code7 string = `
+import pandas as pd
+
+def detect_anomalies(logs, threshold):
+  anomalies = logs[logs['error_rate'] > threshold]
+  return anomalies
+
+#Example usage
+if __name__ == "__main__":
+  # Load logs from a CSV file (replace the file name with your dataset)
+  logs = pd.read_csv('/content/sample_logs_1.csv')
+
+#Display the first few reows of the dataset to understand its structure
+print(logs.head())
+
+#specify the threshold
+threshold = 0.19 # Adjust this based on the dataset's context
+anomalies = detect_anomalies(logs, threshold)
+
+print("Anomalies detected:")
+print(anomalies)
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
 }
@@ -378,4 +401,7 @@ func Lab5Code(c *gin.Context) {
 }
 func Lab6Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code6))
+}
+func Lab7Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code7))
 }
