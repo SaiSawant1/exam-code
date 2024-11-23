@@ -384,6 +384,258 @@ print("Anomalies detected:")
 print(anomalies)
 `
 
+var code8 string = `
+import numpy as np
+import matplotlib.pyplot as plt
+from datetime import datetime
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score
+
+def calculate_sma(data, window):
+    """
+    Calculate Simple Moving Average
+
+    Parameters:
+    data (list): List of values to calculate SMA
+    window (int): Window size for moving average
+
+    Returns:
+    list: Simple moving averages
+    """
+    sma = []
+    for i in range(len(data)):
+        if i < window - 1:
+            sma.append(np.nan)
+        else:
+            sma.append(np.mean(data[i-(window-1):i+1]))
+    return sma
+
+def monitor_performance(metrics, sma_window=5):
+    """
+    Monitor and plot performance metrics
+
+    Parameters:
+    metrics (dict): Dictionary containing training metrics
+    sma_window (int): Window size for moving average
+    """
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 12))
+
+    # Plot loss
+    ax1.plot(metrics['loss'], label='Training Loss', alpha=0.5)
+    ax1.plot(calculate_sma(metrics['loss'], sma_window),
+             label=f'SMA-{sma_window} Loss', linewidth=2)
+    ax1.set_title('Training Loss Over Time')
+    ax1.set_xlabel('Iteration')
+    ax1.set_ylabel('Loss')
+    ax1.legend()
+    ax1.grid(True)
+
+    # Plot accuracy
+    ax2.plot(metrics['accuracy'], label='Training Accuracy', alpha=0.5)
+    ax2.plot(metrics['val_accuracy'], label='Validation Accuracy', alpha=0.5)
+    ax2.plot(calculate_sma(metrics['accuracy'], sma_window),
+             label=f'SMA-{sma_window} Train Accuracy', linewidth=2)
+    ax2.set_title('Training and Validation Accuracy Over Time')
+    ax2.set_xlabel('Iteration')
+    ax2.set_ylabel('Accuracy')
+    ax2.legend()
+    ax2.grid(True)
+
+    plt.tight_layout()
+    plt.show()
+
+def train_model(X_train, X_val, y_train, y_val, max_epochs=100):
+    """
+    Train neural network on Iris dataset
+
+    Parameters:
+    X_train, X_val: Training and validation features
+    y_train, y_val: Training and validation labels
+    max_epochs: Maximum number of training epochs
+
+    Returns:
+    dict: Dictionary containing training metrics
+    """
+    # Initialize model
+    model = MLPClassifier(
+        hidden_layer_sizes=(10, 5),
+        max_iter=1,
+        warm_start=True,  # Allows incremental training
+        random_state=42
+    )
+
+    # Initialize metrics dictionary
+    metrics = {
+        'loss': [],
+        'accuracy': [],
+        'val_accuracy': [],
+        'timestamp': []
+    }
+
+    print("Starting training...")
+    for epoch in range(max_epochs):
+        # Train for one epoch
+        model.fit(X_train, y_train)
+
+        # Record metrics
+        metrics['loss'].append(model.loss_)
+        metrics['accuracy'].append(accuracy_score(y_train, model.predict(X_train)))
+        metrics['val_accuracy'].append(accuracy_score(y_val, model.predict(X_val)))
+        metrics['timestamp'].append(datetime.now())
+
+        # Print progress
+        if (epoch + 1) % 10 == 0:
+            print(f"Epoch {epoch + 1}/{max_epochs}")
+            print(f"Loss: {metrics['loss'][-1]:.4f}")
+            print(f"Train Accuracy: {metrics['accuracy'][-1]:.4f}")
+            print(f"Validation Accuracy: {metrics['val_accuracy'][-1]:.4f}")
+            print("-" * 40)
+
+    return metrics, model
+
+def main():
+    """
+    Main function to load data, train model, and visualize results
+    """
+    # Load Iris dataset
+    print("Loading Iris dataset...")
+    iris = load_iris()
+    X, y = iris.data, iris.target
+
+    # Split data into train and validation sets
+    X_train, X_val, y_train, y_val = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    # Scale the features
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_val = scaler.transform(X_val)
+
+    # Train model and get metrics
+    metrics, model = train_model(X_train, X_val, y_train, y_val, max_epochs=100)
+
+    # Calculate moving averages
+    sma_window = 5
+    loss_sma = calculate_sma(metrics['loss'], sma_window)
+    accuracy_sma = calculate_sma(metrics['accuracy'], sma_window)
+
+    # Create DataFrame for easy analysis
+    df = pd.DataFrame({
+        'Loss': metrics['loss'],
+        'Loss_SMA': loss_sma,
+        'Train_Accuracy': metrics['accuracy'],
+        'Val_Accuracy': metrics['val_accuracy'],
+        'Accuracy_SMA': accuracy_sma,
+        'Timestamp': metrics['timestamp']
+    })
+
+    # Display summary statistics
+    print("\nSummary Statistics:")
+    print(df.describe())
+
+    # Monitor and plot performance
+    print("\nGenerating performance plots...")
+    monitor_performance(metrics, sma_window=5)
+
+    # Print final model performance
+    print("\nFinal Model Performance:")
+    print(f"Training Accuracy: {metrics['accuracy'][-1]:.4f}")
+    print(f"Validation Accuracy: {metrics['val_accuracy'][-1]:.4f}")
+
+    return df, model
+
+if __name__ == "__main__":
+    df, model = main()
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+def simple_moving_average(data, window_size):
+    """
+    Calculate the Simple Moving Average (SMA).
+
+    Parameters:
+    - data: list of numeric values
+    - window_size: size of the moving window
+
+    Returns:
+    - sma: list of smoothed values
+    """
+    sma = np.convolve(data, np.ones(window_size)/window_size, mode='valid')
+    return sma
+
+def monitor_performance(X_train, y_train, X_test, y_test, epochs, window_size):
+    """
+    Monitor and plot performance metrics (accuracy and error rate) of a model over epochs.
+
+    Parameters:
+    - X_train, y_train: training data and labels
+    - X_test, y_test: testing data and labels
+    - epochs: number of training epochs
+    - window_size: window size for the SMA
+    """
+    model = LogisticRegression(max_iter=1, solver='saga', warm_start=True)
+
+    accuracy_history = []
+    error_rate_history = []
+
+    for epoch in range(epochs):
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+
+        accuracy = accuracy_score(y_test, y_pred)
+        error_rate = 1 - accuracy
+
+        accuracy_history.append(accuracy)
+        error_rate_history.append(error_rate)
+        print(f'Epoch {epoch + 1}/{epochs} - Accuracy: {accuracy:.4f}, Error Rate: {error_rate:.4f}')
+
+    # Calculate SMAs
+    smoothed_accuracy = simple_moving_average(accuracy_history, window_size)
+    smoothed_error_rate = simple_moving_average(error_rate_history, window_size)
+
+    # Plotting
+    plt.figure(figsize=(14, 6))
+
+    # Accuracy plot
+    plt.subplot(1, 2, 1)
+    plt.plot(range(1, len(accuracy_history) + 1), accuracy_history, label='Accuracy', color='blue')
+    plt.plot(range(window_size, len(smoothed_accuracy) + window_size), smoothed_accuracy, label='SMA Accuracy', color='orange')
+    plt.title('Model Accuracy Over Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+
+    # Error Rate plot
+    plt.subplot(1, 2, 2)
+    plt.plot(range(1, len(error_rate_history) + 1), error_rate_history, label='Error Rate', color='red')
+    plt.plot(range(window_size, len(smoothed_error_rate) + window_size), smoothed_error_rate, label='SMA Error Rate', color='purple')
+    plt.title('Model Error Rate Over Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('Error Rate')
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+# Simulate Data
+X, y = make_classification(n_samples=1000, n_features=20, n_classes=2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Monitor performance
+monitor_performance(X_train, y_train, X_test, y_test, epochs=50, window_size=5)
+
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
 }
@@ -404,4 +656,7 @@ func Lab6Code(c *gin.Context) {
 }
 func Lab7Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code7))
+}
+func Lab8Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code8))
 }

@@ -18,9 +18,10 @@ func main() {
 		v1.GET("/5", aiethics.Lab5Code)
 		v1.GET("/6", aiethics.Lab6Code)
 		v1.GET("/7", aiethics.Lab7Code)
-		v1.GET("/8", aiethics.Lab1Code)
+		v1.GET("/8", aiethics.Lab8Code)
 		v1.GET("/9", aiethics.Lab1Code)
 		v1.GET("/10", aiethics.Lab1Code)
+		v1.GET("/11", aiethics.Lab1Code)
 	}
 
 	router.Run(":8080")
