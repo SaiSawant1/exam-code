@@ -758,6 +758,57 @@ print("Fair Model Selection Rates by Group:")
 print(metric_frame_fair.by_group)
 
 `
+var code11 string = `
+import pandas as pd
+import random
+
+# Function to generate dataset
+def generate_dataset(num_records=1000):
+    """
+    Generates a random dataset of customer information.
+    :param num_records: Number of records to generate
+    :return: Pandas DataFrame with customer data
+    """
+    data = {
+        "CustomerID": list(range(1, num_records + 1)),
+        "Gender": [random.choice(["Male", "Female"]) for _ in range(num_records)],
+        "Age": [random.randint(18, 65) for _ in range(num_records)],
+        "AnnualIncome": [random.randint(20000, 120000) for _ in range(num_records)],
+    }
+    return pd.DataFrame(data)
+
+# Function to check for gender bias
+def check_gender_bias(dataset):
+    """
+    Checks for gender bias in the dataset.
+    :param dataset: Pandas DataFrame containing customer data
+    """
+    # Gender distribution
+    gender_counts = dataset["Gender"].value_counts()
+    total_records = len(dataset)
+    print("Gender Distribution:")
+    print(gender_counts)
+
+    # Calculate percentages
+    male_percentage = (gender_counts.get("Male", 0) / total_records) * 100
+    female_percentage = (gender_counts.get("Female", 0) / total_records) * 100
+
+    print(f"\nPercentage of Males: {male_percentage:.2f}%")
+    print(f"Percentage of Females: {female_percentage:.2f}%")
+
+    # Check for significant imbalance
+    if abs(male_percentage - female_percentage) > 20:
+        print("\nSignificant gender imbalance detected!")
+    else:
+        print("\nThe gender distribution is balanced.")
+
+# Generate the dataset
+customer_data = generate_dataset()
+
+# Check for gender bias
+check_gender_bias(customer_data)
+
+`
 
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
@@ -787,5 +838,8 @@ func Lab9Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code9))
 }
 func Lab10Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code10))
+}
+func Lab11Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code10))
 }
