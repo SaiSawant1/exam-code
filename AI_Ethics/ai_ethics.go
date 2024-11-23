@@ -841,5 +841,5 @@ func Lab10Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code10))
 }
 func Lab11Code(c *gin.Context) {
-	c.Data(200, "text/plain", []byte(code10))
+	c.Data(200, "text/plain", []byte(code11))
 }
