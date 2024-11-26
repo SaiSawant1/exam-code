@@ -28,6 +28,7 @@ func main() {
 	v2 := router.Group("/aai")
 	{
 		v2.GET("/1", aai.Lab1Code)
+		v2.GET("/2", aai.Lab2Code)
 	}
 
 	router.Run(":8080")

@@ -83,6 +83,99 @@ apply_laplacian(image)
 apply_weighted_average(image)
   `
 
+var code2 string = `
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.linalg import hadamard
+from skimage.filters import sobel
+
+# Helper function to display images
+
+
+def display_image(title, image):
+    plt.figure()
+    plt.title(title)
+    plt.imshow(image, cmap='gray')
+    plt.axis('off')
+    plt.show()
+
+# Function to perform the Walsh-Hadamard transform
+
+
+def compute_walsh_hadamard(image):
+    """Compute and display the Walsh-Hadamard transform."""
+    h_size = 1
+    while h_size < max(image.shape):
+        h_size *= 2
+    h_matrix = hadamard(h_size)
+    padded_image = np.zeros((h_size, h_size))
+    padded_image[:image.shape[0], :image.shape[1]] = image
+    transformed = np.dot(np.dot(h_matrix, padded_image), h_matrix)
+    magnitude_spectrum = np.log(np.abs(transformed) + 1)
+    display_image("Walsh-Hadamard Transform", magnitude_spectrum)
+
+# Function to perform the Slant transform
+
+
+def compute_slant_transform(image):
+    """Compute and display the Slant transform."""
+    # Define a Slant transform matrix
+    def slant_matrix(size):
+        S = np.zeros((size, size))
+        for i in range(size):
+            for j in range(size):
+                if i == 0:
+                    S[i, j] = 1 / np.sqrt(size)
+                else:
+                    S[i, j] = np.sqrt(
+                        2 / size) * np.cos((np.pi * i * (2 * j + 1)) / (2 * size))
+        return S
+
+    h, w = image.shape
+    size = max(h, w)
+    S = slant_matrix(size)
+
+    # Pad the image to match the Slant matrix size
+    padded_image = np.zeros((size, size))
+    padded_image[:h, :w] = image
+
+    # Apply the Slant transform
+    transformed = np.dot(np.dot(S, padded_image), S.T)
+    magnitude_spectrum = np.log(np.abs(transformed) + 1)
+    display_image("Slant Transform", magnitude_spectrum)
+
+# Function to apply the Sobel filter
+
+
+def apply_sobel_filter(image):
+    """Apply and display the Sobel filter."""
+    sobel_filtered = sobel(image)
+    display_image("Sobel Filtered Image", sobel_filtered)
+
+# Function to apply a composite masking filter
+
+
+def apply_composite_mask_filter(image):
+    """Apply and display a composite masking filter."""
+    kernel = np.array([[1, -1, 0],
+                       [-1, 4, -1],
+                       [0, -1, 1]])
+    composite_filtered = cv2.filter2D(image, -1, kernel)
+    display_image("Composite Mask Filtered Image", composite_filtered)
+image_path = "./data/veg.jpg"
+image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
+# Perform tasks
+compute_walsh_hadamard(image)
+compute_slant_transform(image)
+apply_sobel_filter(image)
+apply_composite_mask_filter(image)
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
+}
+func Lab2Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code2))
 }
