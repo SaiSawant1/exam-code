@@ -1078,6 +1078,148 @@ mp = [
 ]
 TSPUtil(mp)
 `
+var code12 string = `
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+
+# Device configuration: Use GPU if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
+# Load MNIST dataset
+
+
+def load_data(batch_size=128):
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))  # Normalize to [-1, 1]
+    ])
+    dataset = datasets.MNIST(root="./data", train=True,
+                             transform=transform, download=True)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+
+
+# Function to plot generated images
+def plot_generated_images(generator, epoch, noise_dim, examples=16, dim=(4, 4)):
+    generator.eval()
+    noise = torch.randn(examples, noise_dim).to(device)
+    fake_images = generator(noise).detach().cpu()
+    fake_images = (fake_images + 1) / 2  # Rescale to [0, 1]
+
+    fig, axes = plt.subplots(dim[0], dim[1], figsize=(6, 6))
+    for i, ax in enumerate(axes.flatten()):
+        ax.imshow(fake_images[i][0], cmap="gray")
+        ax.axis("off")
+    plt.suptitle(f"Generated Images - Epoch {epoch + 1}")
+    plt.show()
+
+# Generator model
+class Generator(nn.Module):
+    def __init__(self, noise_dim):
+        super(Generator, self).__init__()
+        self.model = nn.Sequential(
+            nn.Linear(noise_dim, 256),
+            nn.LeakyReLU(0.2),
+            nn.Linear(256, 512),
+            nn.LeakyReLU(0.2),
+            nn.Linear(512, 1024),
+            nn.LeakyReLU(0.2),
+            nn.Linear(1024, 28 * 28),
+            nn.Tanh()  # Output scaled to [-1, 1]
+        )
+
+    def forward(self, z):
+        return self.model(z).view(-1, 1, 28, 28)
+
+# Discriminator model
+
+
+class Discriminator(nn.Module):
+    def __init__(self):
+        super(Discriminator, self).__init__()
+        self.model = nn.Sequential(
+            nn.Linear(28 * 28, 1024),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3),
+            nn.Linear(1024, 512),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3),
+            nn.Linear(512, 256),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3),
+            nn.Linear(256, 1),
+            nn.Sigmoid()
+        )
+
+    def forward(self, img):
+        return self.model(img.view(img.size(0), -1))
+# Training the GAN
+def train_gan(generator, discriminator, data_loader, epochs=10, noise_dim=100, lr=0.0002):
+    # Loss and optimizers
+    criterion = nn.BCELoss()
+    optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
+    optimizer_D = optim.Adam(discriminator.parameters(),
+                             lr=lr, betas=(0.5, 0.999))
+
+    for epoch in range(epochs):
+        for i, (real_images, _) in enumerate(data_loader):
+            batch_size = real_images.size(0)
+
+            # Move real images to GPU
+            real_images = real_images.to(device)
+
+            # Labels for real and fake images
+            real_labels = torch.ones(batch_size, 1).to(device)
+            fake_labels = torch.zeros(batch_size, 1).to(device)
+
+            # ---------------------
+            # Train Discriminator
+            # ---------------------
+            noise = torch.randn(batch_size, noise_dim).to(device)
+            fake_images = generator(noise)
+
+            d_loss_real = criterion(discriminator(real_images), real_labels)
+            d_loss_fake = criterion(discriminator(
+                fake_images.detach()), fake_labels)
+            d_loss = 0.5 * (d_loss_real + d_loss_fake)
+
+            optimizer_D.zero_grad()
+            d_loss.backward()
+            optimizer_D.step()
+
+            # -----------------
+            # Train Generator
+            # -----------------
+            noise = torch.randn(batch_size, noise_dim).to(device)
+            g_loss = criterion(discriminator(fake_images), real_labels)
+
+            optimizer_G.zero_grad()
+            g_loss.backward()
+            optimizer_G.step()
+
+        # Plot generated images at the end of each epoch
+        print(f"Epoch [{epoch + 1}/{epochs}] | D Loss: {d_loss.item():.4f} | G Loss: {g_loss.item():.4f}")
+        plot_generated_images(generator, epoch, noise_dim)
+
+
+# Initialize models and data loader
+noise_dim = 100
+batch_size = 128
+epochs = 10
+
+data_loader = load_data(batch_size)
+generator = Generator(noise_dim).to(device)
+discriminator = Discriminator().to(device)
+
+# Train the GAN
+train_gan(generator, discriminator,
+          data_loader, epochs, noise_dim)
+`
 
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
@@ -1111,4 +1253,7 @@ func Lab10Code(c *gin.Context) {
 }
 func Lab11Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code11))
+}
+func Lab12Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code12))
 }
