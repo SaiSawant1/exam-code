@@ -201,6 +201,39 @@ plt.semilogy(spectral_centroid, label='Spectral Centroid', color='b')
 plt.colorbar()
 `
 
+var code4 string = `
+import librosa
+import librosa.display
+import matplotlib.pyplot as plt
+import numpy as np
+
+audio = './data/datasets/Lab-Exam/audio/sample.mp3'
+audio_np_array, sample_rate = librosa.load(audio, sr=None)
+
+chroma = librosa.feature.chroma_stft(y=audio_np_array, sr=sample_rate)
+librosa.display.specshow(chroma, sr=sample_rate, x_axis='time')
+plt.colorbar()
+plt.title('Chroma STFT')
+plt.tight_layout()
+plt.show()
+
+spectral_contrast = librosa.feature.spectral_contrast(
+    y=audio_np_array, sr=sample_rate)
+librosa.display.specshow(spectral_contrast, sr=sample_rate, x_axis='time')
+plt.colorbar()
+plt.title('Spectral Contrast')
+plt.tight_layout()
+plt.show()
+
+pitch_sal = librosa.piptrack(y=audio_np_array, sr=sample_rate)
+pitch_values = np.argmax(pitch_sal, axis=1)
+librosa.display.specshow(pitch_values, sr=sample_rate)
+plt.colorbar()
+plt.title('Pitch Salience')
+plt.tight_layout()
+plt.show()
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
 }
@@ -209,4 +242,7 @@ func Lab2Code(c *gin.Context) {
 }
 func Lab3Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code3))
+}
+func Lab4Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code4))
 }
