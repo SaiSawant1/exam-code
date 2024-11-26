@@ -1077,6 +1077,138 @@ mp = [
     [5, INT_MAX, 3, 10, 0],
 ]
 TSPUtil(mp)
+
+!pip install deap
+
+import random
+import itertools
+import numpy as np
+from deap import base, creator, tools, algorithms
+import matplotlib.pyplot as plt
+
+# Define cities as (x, y) coordinates
+cities = np.array([
+    [0, 0], [2, 3], [5, 1], [1, 4], [6, 0]
+])
+
+# Calculate the distance between two cities
+
+
+def distance(city1, city2):
+    return np.linalg.norm(city1 - city2)
+
+# Fitness evaluation: Total distance of the TSP route
+
+
+def evaluate(individual):
+    total_distance = 0
+    for i in range(len(individual) - 1):
+        total_distance += distance(cities[individual[i]],
+                                   cities[individual[i + 1]])
+    # Add distance to return to the starting city
+    total_distance += distance(cities[individual[-1]], cities[individual[0]])
+    return (total_distance,)  # Return a tuple as required by DEAP
+
+# Brute force to find the exact optimal solution
+
+
+def brute_force_tsp(cities):
+    num_cities = len(cities)
+    all_routes = itertools.permutations(range(num_cities))  # All permutations
+    min_distance = float("inf")
+    best_route = None
+    for route in all_routes:
+        total_distance = 0
+        for i in range(len(route) - 1):
+            total_distance += distance(cities[route[i]], cities[route[i + 1]])
+        # Add distance to return to the starting city
+        total_distance += distance(cities[route[-1]], cities[route[0]])
+        if total_distance < min_distance:
+            min_distance = total_distance
+            best_route = route
+    return best_route, min_distance
+
+
+# Genetic Algorithm setup
+creator.create("FitnessMin", base.Fitness,
+               weights=(-1.0,))  # Minimize distance
+creator.create("Individual", list, fitness=creator.FitnessMin)
+
+toolbox = base.Toolbox()
+toolbox.register("indices", random.sample, range(len(cities)), len(cities))
+toolbox.register("individual", tools.initIterate,
+                 creator.Individual, toolbox.indices)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+toolbox.register("mate", tools.cxOrdered)  # Ordered crossover for TSP
+toolbox.register("mutate", tools.mutShuffleIndexes,
+                 indpb=0.2)  # Shuffle mutation
+toolbox.register("select", tools.selTournament,
+                 tournsize=3)  # Tournament selection
+toolbox.register("evaluate", evaluate)
+
+# Run the Genetic Algorithm
+
+
+def run_ga():
+    population = toolbox.population(n=100)  # Population size
+    ngen = 500  # Number of generations
+    cxpb = 0.7  # Crossover probability
+    mutpb = 0.2  # Mutation probability
+
+    print("Running Genetic Algorithm...")
+    result, _ = algorithms.eaSimple(
+        population, toolbox, cxpb, mutpb, ngen, verbose=False
+    )
+    best_individual = tools.selBest(population, k=1)[0]
+    return best_individual
+
+
+# Execute the Genetic Algorithm
+best_individual = run_ga()
+
+# Extract and display the GA solution
+best_route = best_individual
+shortest_distance_ga = evaluate(best_route)[0]
+
+# Find the exact optimal solution using brute force
+optimal_route, shortest_distance_optimal = brute_force_tsp(cities)
+
+# Print results
+print("\nGenetic Algorithm Solution:")
+print("Best Route:", best_route)
+print(f"Shortest Distance (GA): {shortest_distance_ga:.2f}")
+
+print("\nOptimal Solution (Brute Force):")
+print("Optimal Route:", optimal_route)
+print(f"Shortest Distance (Optimal): {shortest_distance_optimal:.2f}")
+
+# Visualize both solutions
+route_ga = np.append(best_route, best_route[0])  # Include return to start
+route_optimal = np.append(optimal_route, optimal_route[0])
+
+plt.figure(figsize=(12, 6))
+
+# Plot GA solution
+plt.subplot(1, 2, 1)
+x_coords_ga = cities[route_ga, 0]
+y_coords_ga = cities[route_ga, 1]
+plt.plot(x_coords_ga, y_coords_ga, marker="o")
+plt.title(f"GA Solution (Distance: {shortest_distance_ga:.2f})")
+plt.xlabel("X Coordinate")
+plt.ylabel("Y Coordinate")
+
+# Plot Optimal solution
+plt.subplot(1, 2, 2)
+x_coords_optimal = cities[route_optimal, 0]
+y_coords_optimal = cities[route_optimal, 1]
+plt.plot(x_coords_optimal, y_coords_optimal, marker="o")
+plt.title(f"Optimal Solution (Distance: {shortest_distance_optimal:.2f})")
+plt.xlabel("X Coordinate")
+plt.ylabel("Y Coordinate")
+
+plt.tight_layout()
+plt.show()
 `
 var code12 string = `
 import torch
