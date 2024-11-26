@@ -234,6 +234,115 @@ plt.tight_layout()
 plt.show()
 `
 
+var code5 string = `
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+
+
+def dfs_search(graph, start, target, visited=None):
+    if visited is None:
+        visited = np.zeros(graph.shape[0], dtype=bool)
+
+    # Mark the current node as visited
+    visited[start] = True
+    print(f"Visited node {start}")
+
+    # If the target node is found, stop the search
+    if start == target:
+        print(f"Target node {target} found!")
+        return True  # Found the target
+
+    # Recursively visit all adjacent, unvisited nodes
+    for neighbor, is_connected in enumerate(graph[start]):
+        if is_connected and not visited[neighbor]:
+            if dfs_search(graph, neighbor, target, visited):
+                return True  # Propagate success up the call stack
+
+    return False  # Target not found in this branch
+
+
+# Example graph as an adjacency matrix (6 nodes)
+graph = np.array([[0, 1, 1, 0, 0, 0],
+                  [1, 0, 0, 1, 0, 0],
+                  [1, 0, 0, 0, 1, 1],
+                  [0, 1, 0, 0, 0, 0],
+                  [0, 0, 1, 0, 0, 0],
+                  [0, 0, 1, 0, 0, 0]])
+
+# DFS search with path recording
+
+
+def dfs_find_path(graph, start, target, visited=None, path=None):
+    if visited is None:
+        visited = np.zeros(graph.shape[0], dtype=bool)
+    if path is None:
+        path = []
+
+    # Mark the current node as visited and add it to the path
+    visited[start] = True
+    path.append(start)
+
+    # If the target node is found, return the path
+    if start == target:
+        return path
+
+    # Recursively visit all adjacent, unvisited nodes
+    for neighbor, is_connected in enumerate(graph[start]):
+        if is_connected and not visited[neighbor]:
+            result = dfs_find_path(graph, neighbor, target, visited, path)
+            if result is not None:
+                return result  # Return the path if target is found
+
+    # Backtrack if no path to target found in this branch
+    path.pop()
+    return None
+
+
+# Example usage
+path_to_target = dfs_find_path(graph, start=0, target=3)
+if path_to_target:
+    print(f"Path to target: {path_to_target}")
+else:
+    print("Target node not found.")
+
+
+def visualize_graph(graph, start, path=None):
+    # Create a graph
+    G = nx.Graph()
+
+    # Add edges to the graph from the adjacency matrix
+    num_nodes = graph.shape[0]
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+            if graph[i, j] == 1:  # There's an edge between node i and j
+                G.add_edge(i, j)
+
+    # Define node colors, making the starting node red and others blue
+    node_colors = ['red' if node ==
+                   start else 'lightblue' for node in range(num_nodes)]
+
+    # Draw the graph
+    pos = nx.spring_layout(G)  # Positions for all nodes
+    nx.draw(G, pos, with_labels=True, node_color=node_colors,
+            node_size=500, font_size=10, font_color='black', edge_color='gray')
+
+    # Highlight the DFS path if it exists
+    if path:
+        # Create a list of edges in the path
+        path_edges = list(zip(path, path[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges,
+                               width=2, edge_color='blue')
+
+    # Display the plot
+    plt.title("Graph Visualization with DFS Path")
+    plt.show()
+
+
+# Call the function to visualize the graph with the DFS path highlighted
+visualize_graph(graph, start=0, path=path_to_target)
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
 }
@@ -245,4 +354,7 @@ func Lab3Code(c *gin.Context) {
 }
 func Lab4Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code4))
+}
+func Lab5Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code5))
 }
