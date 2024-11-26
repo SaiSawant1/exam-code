@@ -621,6 +621,104 @@ pos_tags = pos_tagging(filtered_tokens)
 print("POS Tags:", pos_tags)
 `
 
+var code9 string = `
+# install via python -m spacy download en_core_web_sm
+
+
+import nltk
+import spacy
+from textblob import TextBlob
+from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+import contractions
+
+# Download required NLTK resources
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('stopwords')
+
+# Load SpaCy for Named Entity Recognition
+nlp = spacy.load("en_core_web_sm")
+
+# Preprocessing Functions
+
+
+def expand_contractions(text):
+    """Expand contractions using the contractions library."""
+    return contractions.fix(text)
+
+
+def correct_spelling(text):
+    """Correct spelling errors in the text."""
+    return str(TextBlob(text).correct())
+
+
+def apply_stemming(tokens):
+    """Apply stemming to tokens."""
+    stemmer = PorterStemmer()
+    return [stemmer.stem(word) for word in tokens]
+
+
+def apply_lemmatization(tokens):
+    """Apply lemmatization to tokens."""
+    lemmatizer = WordNetLemmatizer()
+    return [lemmatizer.lemmatize(word) for word in tokens]
+
+
+def extract_text_features(text):
+    """Extract features such as word count, sentence count, and average word length."""
+    sentences = sent_tokenize(text)
+    words = word_tokenize(text)
+    word_count = len(words)
+    sentence_count = len(sentences)
+    avg_word_length = sum(len(word) for word in words) / \
+        word_count if word_count > 0 else 0
+    return {
+        "Word Count": word_count,
+        "Sentence Count": sentence_count,
+        "Average Word Length": avg_word_length
+    }
+
+
+def named_entity_recognition(text):
+    """Perform Named Entity Recognition to identify entities like names, dates, locations."""
+    doc = nlp(text)
+    return [(ent.text, ent.label_) for ent in doc.ents]
+
+
+# Example Text
+text_q2 = "I'm traveling to New York in September. Can't wait to visit the Empire State Building!"
+
+# Pipeline
+print("Original Text:", text_q2)
+
+# Step 1: Expand Contractions
+expanded_text = expand_contractions(text_q2)
+print("After Expanding Contractions:", expanded_text)
+
+# Step 2: Spelling Correction
+corrected_text = correct_spelling(expanded_text)
+print("After Spelling Correction:", corrected_text)
+
+# Step 3: Tokenization
+tokens = word_tokenize(corrected_text)
+print("Tokens:", tokens)
+
+# Step 4: Stemming and Lemmatization
+stemmed_tokens = apply_stemming(tokens)
+lemmatized_tokens = apply_lemmatization(tokens)
+print("Stemmed Tokens:", stemmed_tokens)
+print("Lemmatized Tokens:", lemmatized_tokens)
+
+# Step 5: Extract Text Features
+features = extract_text_features(corrected_text)
+print("Text Features:", features)
+
+# Step 6: Named Entity Recognition
+entities = named_entity_recognition(corrected_text)
+print("Named Entities:", entities)
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
 }
@@ -644,4 +742,7 @@ func Lab7Code(c *gin.Context) {
 }
 func Lab8Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code8))
+}
+func Lab9Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code9))
 }
