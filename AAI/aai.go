@@ -342,6 +342,112 @@ def visualize_graph(graph, start, path=None):
 # Call the function to visualize the graph with the DFS path highlighted
 visualize_graph(graph, start=0, path=path_to_target)
 `
+var code6 string = `
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+from heapq import heappop, heappush
+
+
+# Heuristic function (for simplicity, we use straight-line distance)
+def heuristic(node, target, positions):
+    pos1 = positions[node]
+    pos2 = positions[target]
+    # Euclidean distance
+    return np.linalg.norm(np.array(pos1) - np.array(pos2))
+
+# A* search algorithm
+def a_star_search(graph, start, target, positions):
+    num_nodes = graph.shape[0]
+    open_set = []
+    heappush(open_set, (0, start))  # (total_cost, node)
+
+    came_from = {start: None}
+    g_score = {node: float('inf') for node in range(num_nodes)}
+    g_score[start] = 0
+
+    f_score = {node: float('inf') for node in range(num_nodes)}
+    f_score[start] = heuristic(start, target, positions)
+
+    while open_set:
+        _, current = heappop(open_set)
+
+        if current == target:
+            # Reconstruct the path
+            path = []
+            while current is not None:
+                path.append(current)
+                current = came_from[current]
+            return path[::-1]  # Return reversed path
+
+        for neighbor, weight in enumerate(graph[current]):
+            if weight > 0:  # If there is an edge
+                tentative_g_score = g_score[current] + weight
+
+                if tentative_g_score < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, target, positions)
+                    heappush(open_set, (f_score[neighbor], neighbor))
+
+    return None  # No path found
+
+
+# Visualization function with highlighted path, start, and target nodes
+def visualize_a_star(graph, positions, path, start, target):
+    G = nx.Graph()
+
+    num_nodes = graph.shape[0]
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+            if graph[i, j] > 0:
+                G.add_edge(i, j, weight=graph[i, j])
+
+    pos = positions
+
+    # Draw nodes
+    node_colors = ['green' if node == target else 'red' if node ==
+                   start else 'lightblue' for node in range(num_nodes)]
+    nx.draw(G, pos, with_labels=True, node_color=node_colors,
+            node_size=500, font_color='black', edge_color='gray')
+
+    # Highlight the path found
+    if path:
+        path_edges = list(zip(path, path[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges,
+                               width=2, edge_color='blue')
+
+    # Show plot
+    plt.title("A* Search Visualization")
+    plt.show()
+
+
+# Example graph as an adjacency matrix (weighted graph, 6 nodes)
+graph = np.array([[0, 1, 4, 0, 0, 0],
+                  [1, 0, 4, 2, 7, 0],
+                  [4, 4, 0, 3, 5, 0],
+                  [0, 2, 3, 0, 4, 6],
+                  [0, 7, 5, 4, 0, 7],
+                  [0, 0, 0, 6, 7, 0]])
+
+# Node positions (for visualization)
+positions = {0: (0, 0), 1: (1, 1), 2: (1, -1),
+             3: (2, 0), 4: (3, 1), 5: (3, -1)}
+
+# Run A* search from node 0 to node 5
+start_node = 0
+target_node = 5
+path = a_star_search(graph, start=start_node,
+                     target=target_node, positions=positions)
+
+if path:
+    print(f"Path found: {path}")
+else:
+    print("No path found.")
+
+# Visualize the graph and the path found by A*
+visualize_a_star(graph, positions, path, start=start_node, target=target_node)
+`
 
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
@@ -357,4 +463,7 @@ func Lab4Code(c *gin.Context) {
 }
 func Lab5Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code5))
+}
+func Lab6Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code6))
 }
