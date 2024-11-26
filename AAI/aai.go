@@ -173,9 +173,40 @@ apply_sobel_filter(image)
 apply_composite_mask_filter(image)
 `
 
+var code3 string = `
+import librosa
+import librosa.display
+import matplotlib.pyplot as plt
+import numpy as np
+
+audio = './data/datasets/Lab-Exam/audio/sample.mp3'
+audio_np_array, sample_rate = librosa.load(audio, sr=None)
+
+amplitude_envelope = np.abs(librosa.effects.preemphasis(
+    audio_np_array))  # preemphasis is a filter
+librosa.display.waveshow(amplitude_envelope, sr=sample_rate)
+
+loudness_db = librosa.amplitude_to_db(amplitude_envelope, ref=np.max)
+librosa.display.waveshow(loudness_db, sr=sample_rate)
+
+mfccs = librosa.feature.mfcc(y=audio_np_array, sr=sample_rate, n_mfcc=13)
+librosa.display.specshow(mfccs, sr=sample_rate)
+plt.colorbar()
+
+S = librosa.feature.melspectrogram(y=audio_np_array, sr=sample_rate)
+spectral_centroid = librosa.feature.spectral_centroid(S=S)
+librosa.display.specshow(librosa.power_to_db(
+    S, ref=np.max), x_axis='time', y_axis='mel')
+plt.semilogy(spectral_centroid, label='Spectral Centroid', color='b')
+plt.colorbar()
+`
+
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
 }
 func Lab2Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code2))
+}
+func Lab3Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code3))
 }
