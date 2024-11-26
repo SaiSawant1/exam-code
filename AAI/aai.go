@@ -547,6 +547,79 @@ plt.xlabel("Sentiment")
 plt.ylabel("Count")
 plt.show()
 `
+var code8 string = `
+import nltk
+from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.corpus import stopwords
+from nltk import pos_tag
+import re
+import contractions
+
+# Download required NLTK resources
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger_eng')
+# Preprocessing Functions
+
+
+def expand_contractions(text):
+    """Expand contractions using the contractions library."""
+    return contractions.fix(text)
+
+
+def remove_special_characters(text):
+    """Remove special characters from the text."""
+    return re.sub(r'[^a-zA-Z\s]', '', text)
+
+
+def tokenize_text(text, level="word"):
+    """Tokenize text into words or sentences."""
+    if level == "word":
+        return word_tokenize(text)
+    elif level == "sentence":
+        return sent_tokenize(text)
+    else:
+        raise ValueError("Level must be 'word' or 'sentence'.")
+
+
+def remove_stopwords(tokens):
+    """Remove stopwords from a list of tokens."""
+    stop_words = set(stopwords.words('english'))
+    return [word for word in tokens if word.lower() not in stop_words]
+
+
+def pos_tagging(tokens):
+    """Perform Part-of-Speech tagging on tokens."""
+    return pos_tag(tokens)
+
+
+# Example Text
+text_q1 = "I'm loving the new updates! It's amazing to see progress. Can't wait for more."
+
+# Pipeline
+print("Original Text:", text_q1)
+
+# Step 1: Expand Contractions
+expanded_text = expand_contractions(text_q1)
+print("After Expanding Contractions:", expanded_text)
+
+# Step 2: Remove Special Characters
+cleaned_text = remove_special_characters(expanded_text)
+print("After Removing Special Characters:", cleaned_text)
+
+# Step 3: Tokenization
+tokens = tokenize_text(cleaned_text)
+print("Tokens:", tokens)
+
+# Step 4: Remove Stopwords
+filtered_tokens = remove_stopwords(tokens)
+print("Filtered Tokens:", filtered_tokens)
+
+# Step 5: POS Tagging
+pos_tags = pos_tagging(filtered_tokens)
+print("POS Tags:", pos_tags)
+`
 
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
@@ -568,4 +641,7 @@ func Lab6Code(c *gin.Context) {
 }
 func Lab7Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code7))
+}
+func Lab8Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code8))
 }
