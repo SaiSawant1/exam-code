@@ -33,6 +33,7 @@ func main() {
 		v2.GET("/4", aai.Lab4Code)
 		v2.GET("/5", aai.Lab5Code)
 		v2.GET("/6", aai.Lab6Code)
+		v2.GET("/7", aai.Lab7Code)
 	}
 
 	router.Run(":8080")

@@ -448,6 +448,105 @@ else:
 # Visualize the graph and the path found by A*
 visualize_a_star(graph, positions, path, start=start_node, target=target_node)
 `
+var code7 string = `
+import PyPDF2
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from textblob import TextBlob
+import matplotlib.pyplot as plt
+from collections import Counter
+import pandas as pd
+
+# Download NLTK data files
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+def extract_text_from_pdf(pdf_path):
+    """Extract text from a PDF file."""
+    with open(pdf_path, 'rb') as file:
+        reader = PyPDF2.PdfReader(file)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text()
+    return text
+
+# Preprocessing Function
+def preprocess_text(text):
+    """Tokenize, remove stopwords, and lemmatize the input text."""
+    stop_words = set(stopwords.words('english'))
+    lemmatizer = WordNetLemmatizer()
+
+    # Tokenization
+    tokens = word_tokenize(text.lower())
+
+    # Stopword Removal and Lemmatization
+    filtered_tokens = [lemmatizer.lemmatize(
+        word) for word in tokens if word.isalnum() and word not in stop_words]
+
+    return ' '.join(filtered_tokens), filtered_tokens
+
+# Sentiment Analysis Function
+
+
+def analyze_sentiment(text):
+    """Analyze the sentiment of the text and return sentiment score and label."""
+    blob = TextBlob(text)
+    # Sentiment polarity: -1 (negative) to +1 (positive)
+    sentiment_score = blob.sentiment.polarity
+
+    if sentiment_score > 0.1:
+        sentiment_label = "Positive"
+    elif sentiment_score < -0.1:
+        sentiment_label = "Negative"
+    else:
+        sentiment_label = "Neutral"
+
+    return sentiment_score, sentiment_label
+
+# Specify the path to your PDF
+pdf_path = "./data/datasets/Lab-Exam/NLP/Nlp4.pdf"  # Replace with your PDF file path
+extracted_text = extract_text_from_pdf(pdf_path)
+
+# Split extracted text into sentences
+sentences = nltk.sent_tokenize(extracted_text)
+results = []
+
+print("\nProcessing Text from PDF...\n")
+
+for sentence in sentences:
+    preprocessed, tokens = preprocess_text(sentence)
+    sentiment_score, sentiment_label = analyze_sentiment(preprocessed)
+    results.append({
+        "Original": sentence,
+        "Preprocessed": preprocessed,
+        "Tokens": tokens,
+        "Sentiment Score": sentiment_score,
+        "Sentiment Label": sentiment_label
+    })
+
+# Convert results to a DataFrame
+df = pd.DataFrame(results)
+
+# Display results
+df.head()
+
+# Display sentiment distribution
+sentiment_distribution = Counter(df['Sentiment Label'])
+
+print("\nSentiment Distribution:")
+for label, count in sentiment_distribution.items():
+    print(f"{label}: {count}")
+
+# Plot the sentiment distribution
+plt.bar(sentiment_distribution.keys(), sentiment_distribution.values())
+plt.title("Sentiment Distribution")
+plt.xlabel("Sentiment")
+plt.ylabel("Count")
+plt.show()
+`
 
 func Lab1Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code1))
@@ -466,4 +565,7 @@ func Lab5Code(c *gin.Context) {
 }
 func Lab6Code(c *gin.Context) {
 	c.Data(200, "text/plain", []byte(code6))
+}
+func Lab7Code(c *gin.Context) {
+	c.Data(200, "text/plain", []byte(code7))
 }
