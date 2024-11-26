@@ -550,6 +550,7 @@ plt.ylabel("Count")
 plt.show()
 `
 var code8 string = `
+!pip install contractions
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
@@ -562,6 +563,7 @@ nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('averaged_perceptron_tagger_eng')
+nltk.download('punkt_tab')
 # Preprocessing Functions
 
 
