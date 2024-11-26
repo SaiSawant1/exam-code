@@ -1,6 +1,7 @@
 package main
 
 import (
+	aai "github.com/SaiSawant1/exam/AAI"
 	aiethics "github.com/SaiSawant1/exam/AI_Ethics"
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +23,11 @@ func main() {
 		v1.GET("/9", aiethics.Lab9Code)
 		v1.GET("/10", aiethics.Lab10Code)
 		v1.GET("/11", aiethics.Lab11Code)
+	}
+
+	v2 := router.Group("/aai")
+	{
+		v2.GET("/1", aai.Lab1Code)
 	}
 
 	router.Run(":8080")
