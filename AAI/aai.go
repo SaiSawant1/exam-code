@@ -449,6 +449,7 @@ else:
 visualize_a_star(graph, positions, path, start=start_node, target=target_node)
 `
 var code7 string = `
+!pip install PyPDF2 nltk textblob matplotlib pandas
 import PyPDF2
 import nltk
 from nltk.corpus import stopwords
@@ -463,6 +464,7 @@ import pandas as pd
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
+nltk.download('punkt_tab')
 
 def extract_text_from_pdf(pdf_path):
     """Extract text from a PDF file."""
