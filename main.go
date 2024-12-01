@@ -2,6 +2,7 @@ package main
 
 import (
 	aai "github.com/SaiSawant1/exam/AAI"
+	aip "github.com/SaiSawant1/exam/AIP"
 	aiethics "github.com/SaiSawant1/exam/AI_Ethics"
 	"github.com/gin-gonic/gin"
 )
@@ -42,16 +43,16 @@ func main() {
 	}
 	v3 := router.Group("/aip")
 	{
-		v3.GET("/1", aai.Lab1Code)
-		v3.GET("/2", aai.Lab2Code)
-		v3.GET("/3", aai.Lab3Code)
-		v3.GET("/4", aai.Lab4Code)
-		v3.GET("/5", aai.Lab5Code)
-		v3.GET("/6", aai.Lab6Code)
-		v3.GET("/7", aai.Lab7Code)
-		v3.GET("/8", aai.Lab8Code)
-		v3.GET("/9", aai.Lab9Code)
-		v3.GET("/10", aai.Lab10Code)
+		v3.GET("/1", aip.Lab1Code)
+		v3.GET("/2", aip.Lab2Code)
+		v3.GET("/3", aip.Lab3Code)
+		v3.GET("/4", aip.Lab4Code)
+		v3.GET("/5", aip.Lab5Code)
+		v3.GET("/6", aip.Lab6Code)
+		v3.GET("/7", aip.Lab7Code)
+		v3.GET("/8", aip.Lab8Code)
+		v3.GET("/9", aip.Lab9Code)
+		v3.GET("/10", aip.Lab10Code)
 	}
 
 	router.Run(":8080")
