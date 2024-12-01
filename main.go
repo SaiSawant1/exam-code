@@ -40,6 +40,19 @@ func main() {
 		v2.GET("/11", aai.Lab11Code)
 		v2.GET("/12", aai.Lab12Code)
 	}
+	v3 := router.Group("/aip")
+	{
+		v3.GET("/1", aai.Lab1Code)
+		v3.GET("/2", aai.Lab2Code)
+		v3.GET("/3", aai.Lab3Code)
+		v3.GET("/4", aai.Lab4Code)
+		v3.GET("/5", aai.Lab5Code)
+		v3.GET("/6", aai.Lab6Code)
+		v3.GET("/7", aai.Lab7Code)
+		v3.GET("/8", aai.Lab8Code)
+		v3.GET("/9", aai.Lab9Code)
+		v3.GET("/10", aai.Lab10Code)
+	}
 
 	router.Run(":8080")
 }
